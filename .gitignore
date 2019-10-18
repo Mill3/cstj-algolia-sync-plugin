@@ -4,3 +4,4 @@ vendor
 .php_cs.cache
 yarn.lock
 composer.lock
+.log

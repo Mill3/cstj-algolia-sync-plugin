@@ -1,9 +1,9 @@
 <?php
 $header = <<<'EOF'
-This file is part of WpAlgolia library.
-(c) Raymond Rutjes for Algolia <raymond.rutjes@algolia.com>
-This source file is subject to the MIT license that is bundled
-with this source code in the file LICENSE.
+This file is part of WpAlgolia plugin.
+(c) Antoine Girard for Mill3 Studio <antoine@mill3.studio>
+@version 0.0.1
+@since 0.0.1
 EOF;
 return PhpCsFixer\Config::create()
     ->setRiskyAllowed(true)
@@ -11,7 +11,7 @@ return PhpCsFixer\Config::create()
         '@Symfony' => true,
         '@Symfony:risky' => true,
         'combine_consecutive_unsets' => true,
-        'header_comment' => array('header' => $header),
+        'header_comment' => array('header' => $header, 'comment_type' => 'PHPDoc'),
         'array_syntax' => array('syntax' => 'long'),
         'no_useless_else' => true,
         'no_useless_return' => true,
