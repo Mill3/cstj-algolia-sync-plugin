@@ -24,8 +24,8 @@ class Main {
     }
 
     private function register() {
-        $registered_post_types['post'] = new \WpAlgolia\Register\Programs('post', ALGOLIA_PREFIX . 'post');
-        $registered_post_types['programs'] = new \WpAlgolia\Register\Posts('programs', ALGOLIA_PREFIX . 'programs');
+        $registered_post_types['programs'] = new \WpAlgolia\Register\Posts('post', ALGOLIA_PREFIX . 'post', $this->algolia_client);
+        $registered_post_types['post'] = new \WpAlgolia\Register\Programs('programs', ALGOLIA_PREFIX . 'programs', $this->algolia_client);
     }
 
     private function cli() {
@@ -52,6 +52,7 @@ add_action(
         }
 
         require_once __DIR__ . '/vendor/autoload.php';
+        require_once __DIR__ . '/inc/AlgoliaIndex.php';
         require_once __DIR__ . '/inc/RegisterAbstract.php';
         require_once __DIR__ . '/inc/RegisterInterface.php';
         require_once __DIR__ . '/post_types/Posts.php';

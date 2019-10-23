@@ -7,11 +7,12 @@
  * @since 0.0.1
  */
 
-namespace WpAlgolia\Register;
+namespace WpAlgolia;
 
 interface RegisterInterface
 {
     public function get_post_type();
-    public function get_index_name();
-    public function save_record($postId, $post);
+    public function save_post($postId, $post);
+    public function delete_post($postId, $post);
+    public function save_all();
 }

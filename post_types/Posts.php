@@ -9,13 +9,26 @@
 
 namespace WpAlgolia\Register;
 
-use WpAlgolia\Register\RegisterAbstract as WpAlgoliaRegisterAbstract;
-use WpAlgolia\Register\RegisterInterface as WpAlgoliaRegisterInterface;
+use WpAlgolia\RegisterAbstract as WpAlgoliaRegisterAbstract;
+use WpAlgolia\RegisterInterface as WpAlgoliaRegisterInterface;
 
 class Posts extends WpAlgoliaRegisterAbstract implements WpAlgoliaRegisterInterface
 {
-    public function __construct($post_type, $index_name)
+    public $index_config = array(
+        'acf_fields' => array(),
+        'taxonomies' => array(),
+        'config'     => array(
+            'searchableAttributes' => array('post_title'),
+            'customRanking'        => array('desc(post_title)'),
+            ),
+            array(
+                'forwardToReplicas' => true,
+            ),
+    );
+
+    public function __construct($post_type, $index_name, $algolia_client)
     {
-        parent::__construct($post_type, $index_name);
+        parent::__construct($post_type, $index_name, $algolia_client, $this->index_config);
     }
+
 }
