@@ -63,28 +63,7 @@ add_action(
         $algoliaClient = \Algolia\AlgoliaSearch\SearchClient::create(ALGOLIA_APPLICATION_ID, ALGOLIA_ADMIN_API_KEY);
 
         // instance with supported post types
-        $instance = new \WpAlgolia\Main($algoliaClient, ['post', 'programs']);
-
-        // // Local dependencies.
-        // require_once 'inc/InMemoryIndexRepository.php';
-        // require_once 'inc/PostsIndex.php';
-        // require_once 'inc/WpQueryRecordsProvider.php';
-
-        // // MyCompany dependencies.
-        // require_once 'inc/MyCompany/PostRecordsProvider.php';
-        // require_once 'inc/MyCompany/PostsIndexSettingsFactory.php';
-        // require_once 'inc/MyCompany/PostChangeListener.php';
-
-        // $indexRepository = new \WpAlgolia\InMemoryIndexRepository();
-        // $algoliaClient = new \WpAlgolia\Client(ALGOLIA_APPLICATION_ID, ALGOLIA_ADMIN_API_KEY);
-
-        // // Register article index.
-        // $settings = new \WpAlgolia\MyCompany\PostsIndexSettingsFactory();
-        // $recordsProvider = new \WpAlgolia\MyCompany\PostRecordsProvider();
-        // $index = new \WpAlgolia\PostsIndex(ALGOLIA_PREFIX . 'posts', $algoliaClient, $settings->create(), $recordsProvider);
-        // new \WpAlgolia\MyCompany\PostChangeListener($index);
-        // $indexRepository->add('posts', $index);
-
+        $instance = new \WpAlgolia\Main($algoliaClient);
 
         // // WP CLI commands.
         // if (defined('WP_CLI') && WP_CLI) {

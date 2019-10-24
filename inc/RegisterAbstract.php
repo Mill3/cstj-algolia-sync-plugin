@@ -46,6 +46,10 @@ abstract class RegisterAbstract
         add_action('wp_insert_post', array($this, 'save_post'), 10, 3);
         add_action("delete_post_{$this->post_type}", array($this, 'delete_post'), 10, 2);
 
+        // add bulk action to post type
+        add_filter("bulk_actions-edit-{$this->post_type}", array($this, 'register_bulk_update'), 10, 3);
+        add_filter("handle_bulk_actions-edit-{$this->post_type}", array($this, 'handle_bulk_update'), 10, 3);
+
         // Taxonomies action
         foreach ($this->index_settings['taxonomies'] as $key => $taxonomy) {
             // TODO: implement taxonomy update too
@@ -89,9 +93,36 @@ abstract class RegisterAbstract
         $this->algolia_index->delete($postID, $post);
     }
 
+    public function register_bulk_update($bulk_actions)
+    {
+        $bulk_actions['wpalgolia_index_update'] = __('Send to Algolia index', 'wp_algolia');
+        $bulk_actions['wpalgolia_index_delete'] = __('Remove from Algolia index', 'wp_algolia');
+
+        return $bulk_actions;
+    }
+
+    public function handle_bulk_update($redirect_to, $doaction, $post_ids)
+    {
+        foreach ($post_ids as $post_ID) {
+            $post = get_post($post_ID);
+            if ($post) {
+                switch ($doaction) {
+                    case 'wpalgolia_index_update':
+                        $this->algolia_index->save($post_ID, $post);
+                        break;
+
+                    case 'wpalgolia_index_delete':
+                        $this->algolia_index->delete($post_ID, $post);
+                        break;
+                }
+            }
+        }
+
+        return $redirect_to;
+    }
+
     public function update_posts()
     {
-        //
         $posts = get_posts(array(
             'post_type'   => $this->get_post_type(),
             'numberposts' => -1,

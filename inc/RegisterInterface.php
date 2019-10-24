@@ -15,5 +15,7 @@ interface RegisterInterface
     public function save_post($postId, $post);
     public function delete_post($postId, $post);
     public function update_posts();
+    public function register_bulk_update($bulk_actions);
+    public function handle_bulk_update($redirect_to, $doaction, $post_ids);
     public function save_all();
 }
