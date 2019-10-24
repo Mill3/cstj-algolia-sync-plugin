@@ -14,6 +14,7 @@ use WpAlgolia\RegisterInterface as WpAlgoliaRegisterInterface;
 
 class Posts extends WpAlgoliaRegisterAbstract implements WpAlgoliaRegisterInterface
 {
+    public $searchable_fields = array('post_title');
 
     public $acf_fields = array();
 
@@ -38,7 +39,6 @@ class Posts extends WpAlgoliaRegisterAbstract implements WpAlgoliaRegisterInterf
 
     public function searchableAttributes()
     {
-        return array_merge($this->acf_fields, $this->taxonomies);
+        return array_merge($this->searchable_fields, $this->acf_fields, $this->taxonomies);
     }
-
 }

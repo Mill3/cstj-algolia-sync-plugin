@@ -14,6 +14,8 @@ use WpAlgolia\RegisterInterface as WpAlgoliaRegisterInterface;
 
 class Programs extends WpAlgoliaRegisterAbstract implements WpAlgoliaRegisterInterface
 {
+    public $searchable_fields = array('post_title');
+
     public $acf_fields = array('code', 'brochure', 'title', 'subtitle', 'body', 'why-title', 'why-subtitle');
 
     public $taxonomies = array('duration', 'programs_type', 'profile', 'condition', 'period');
@@ -28,6 +30,8 @@ class Programs extends WpAlgoliaRegisterAbstract implements WpAlgoliaRegisterInt
                 'customRanking'         => array('asc(code)'),
                 'attributesForFaceting' => array('searchable(programs_type)', 'searchable(profile)', 'searchable(condition)', 'searchable(duration)'),
                 'queryLanguages'        => array('fr'),
+                // 'attributeForDistinct' => 'profile',
+                // 'distinct' => true
             ),
             array(
                'forwardToReplicas' => true,
@@ -39,6 +43,6 @@ class Programs extends WpAlgoliaRegisterAbstract implements WpAlgoliaRegisterInt
 
     public function searchableAttributes()
     {
-        return array_merge($this->acf_fields, $this->taxonomies);
+        return array_merge($this->searchable_fields, $this->acf_fields, $this->taxonomies);
     }
 }
