@@ -14,5 +14,6 @@ interface RegisterInterface
     public function get_post_type();
     public function save_post($postId, $post);
     public function delete_post($postId, $post);
+    public function update_posts();
     public function save_all();
 }

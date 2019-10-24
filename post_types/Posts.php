@@ -14,21 +14,31 @@ use WpAlgolia\RegisterInterface as WpAlgoliaRegisterInterface;
 
 class Posts extends WpAlgoliaRegisterAbstract implements WpAlgoliaRegisterInterface
 {
-    public $index_config = array(
-        'acf_fields' => array(),
-        'taxonomies' => array(),
-        'config'     => array(
-            'searchableAttributes' => array('post_title'),
-            'customRanking'        => array('desc(post_title)'),
-            ),
-            array(
-                'forwardToReplicas' => true,
-            ),
-    );
+
+    public $acf_fields = array();
+
+    public $taxonomies = array('tags');
 
     public function __construct($post_type, $index_name, $algolia_client)
     {
-        parent::__construct($post_type, $index_name, $algolia_client, $this->index_config);
+        $index_config = array(
+            'acf_fields' => $this->acf_fields,
+            'taxonomies' => $this->taxonomies,
+            'config'     => array(
+                'searchableAttributes'  => $this->searchableAttributes(),
+                'queryLanguages'        => array('fr'),
+            ),
+            array(
+               'forwardToReplicas' => true,
+            ),
+        );
+
+        parent::__construct($post_type, $index_name, $algolia_client, $index_config);
+    }
+
+    public function searchableAttributes()
+    {
+        return array_merge($this->acf_fields, $this->taxonomies);
     }
 
 }
