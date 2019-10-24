@@ -50,6 +50,10 @@ abstract class RegisterAbstract
         add_filter("bulk_actions-edit-{$this->post_type}", array($this, 'register_bulk_update'), 10, 3);
         add_filter("handle_bulk_actions-edit-{$this->post_type}", array($this, 'handle_bulk_update'), 10, 3);
 
+        // add extra column in admin
+        add_filter( "manage_{$this->post_type}_posts_columns", array($this, 'manage_admin_columns'), 10, 3 );
+        add_filter( "manage_{$this->post_type}_posts_custom_column", array($this, 'manage_admin_column'), 10, 3 );
+
         // Taxonomies action
         foreach ($this->index_settings['taxonomies'] as $key => $taxonomy) {
             // TODO: implement taxonomy update too
@@ -103,22 +107,36 @@ abstract class RegisterAbstract
 
     public function handle_bulk_update($redirect_to, $doaction, $post_ids)
     {
-        foreach ($post_ids as $post_ID) {
-            $post = get_post($post_ID);
+        foreach ($post_ids as $postID) {
+            $post = get_post($postID);
             if ($post) {
                 switch ($doaction) {
                     case 'wpalgolia_index_update':
-                        $this->algolia_index->save($post_ID, $post);
+                        $this->algolia_index->save($postID, $post);
                         break;
 
                     case 'wpalgolia_index_delete':
-                        $this->algolia_index->delete($post_ID, $post);
+                        $this->algolia_index->delete($postID);
                         break;
                 }
             }
         }
 
         return $redirect_to;
+    }
+
+    public function manage_admin_columns($columns) {
+        $columns['in_index'] = __( 'Algolia Index', 'wp_algolia' );
+
+        return $columns;
+    }
+
+    public function manage_admin_column($column, $post_id) {
+        // $columns['in_index'] = __( 'Index status', 'wp_algolia' );
+        if ($column === 'in_index') {
+            $in_index = $this->algolia_index->record_exist($post_id);
+            echo $in_index ? '<span class="dashicons dashicons-yes-alt" style="color: #5468ff;"></span>' : '';
+        }
     }
 
     public function update_posts()
@@ -131,7 +149,6 @@ abstract class RegisterAbstract
         // update each posts from current post type
         foreach ($posts as $key => $post) {
             $this->algolia_index->save($post->ID, $post);
-            // do_action('wp_algolia_update_record', $post);
         }
     }
 

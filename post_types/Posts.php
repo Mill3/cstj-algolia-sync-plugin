@@ -25,6 +25,7 @@ class Posts extends WpAlgoliaRegisterAbstract implements WpAlgoliaRegisterInterf
         $index_config = array(
             'acf_fields' => $this->acf_fields,
             'taxonomies' => $this->taxonomies,
+            'post_type'  => $post_type,
             'config'     => array(
                 'searchableAttributes'  => $this->searchableAttributes(),
                 'queryLanguages'        => array('fr'),

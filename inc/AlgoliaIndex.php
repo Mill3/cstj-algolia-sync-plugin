@@ -22,6 +22,8 @@ class AlgoliaIndex
 
     public $algolia_client;
 
+    public $post_type;
+
     private $log;
 
     public function __construct($index_name, $algolia_client, $index_settings = array('config' => array()))
@@ -53,7 +55,7 @@ class AlgoliaIndex
     public function save($postID, $post)
     {
         $data = array(
-            'objectID'          => $this->index_objectID($post),
+            'objectID'          => $this->index_objectID($postID),
             'post_title'        => $post->post_title,
             'post_thumbnail'    => get_the_post_thumbnail_url($post, 'post-thumbnail'),
             'excerpt'           => $this->prepareTextContent($post->post_excerpt),
@@ -71,16 +73,25 @@ class AlgoliaIndex
             $data[$taxonomy] = wp_get_post_terms($post->ID, $taxonomy, array('fields' => 'names'));
         }
 
-        $this->log->info('Saving object : '.$this->index_objectID($post));
+        $this->log->info('Saving object : '.$this->index_objectID($postID));
 
         // save object
         $this->index->saveObject($data);
     }
 
-    public function delete($postId, $post)
+    public function delete($postID)
     {
-        $this->log->info('Deleting from index object : '.$this->index_objectID($post));
-        $this->index->deleteObject($this->index_objectID($post));
+        // $this->log->info('Deleting from index object : '.$this->index_objectID($post));
+        $this->index->deleteObject($this->index_objectID($postID));
+    }
+
+    public function record_exist($postID) {
+        $objectID = $this->index_objectID($postID);
+        try {
+            return $this->index->getObject($objectID, array('attributesToRetrieve' => 'objectID'));
+        } catch (\Throwable $th) {
+            return false;
+        }
     }
 
     private function init_index()
@@ -89,9 +100,9 @@ class AlgoliaIndex
         $this->index->setSettings($this->index_settings['config']);
     }
 
-    private function index_objectID($post)
+    private function index_objectID($postID)
     {
-        return implode('_', array($post->post_type, $post->ID));
+        return implode('_', array($this->index_settings['post_type'], $postID));
     }
 
     private function prepareTextContent($content)

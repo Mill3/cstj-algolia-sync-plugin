@@ -17,5 +17,7 @@ interface RegisterInterface
     public function update_posts();
     public function register_bulk_update($bulk_actions);
     public function handle_bulk_update($redirect_to, $doaction, $post_ids);
+    public function manage_admin_columns($columns);
+    public function manage_admin_column($column, $post_id);
     public function save_all();
 }

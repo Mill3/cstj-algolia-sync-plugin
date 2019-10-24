@@ -25,6 +25,7 @@ class Programs extends WpAlgoliaRegisterAbstract implements WpAlgoliaRegisterInt
         $index_config = array(
             'acf_fields' => $this->acf_fields,
             'taxonomies' => $this->taxonomies,
+            'post_type'  => $post_type,
             'config'     => array(
                 'searchableAttributes'  => $this->searchableAttributes(),
                 'customRanking'         => array('asc(code)'),
