@@ -18,7 +18,7 @@ class Posts extends WpAlgoliaRegisterAbstract implements WpAlgoliaRegisterInterf
 
     public $acf_fields = array();
 
-    public $taxonomies = array('tags');
+    public $taxonomies = array('category');
 
     public function __construct($post_type, $index_name, $algolia_client)
     {
