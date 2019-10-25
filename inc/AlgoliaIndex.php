@@ -12,23 +12,58 @@ namespace WpAlgolia;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 
-// const CACHE_KEY = "wp-algolia-index-initialized";
-// const CACHE_GROUP =
-
 class AlgoliaIndex
 {
+
+    /**
+     * Algolia Index settings
+     *
+     * @var array
+     */
     public $index_settings;
 
+    /**
+     * Algolia index instance
+     *
+     * @var object
+     */
     public $index = null;
 
+    /**
+     * The index indice name in Algolia
+     *
+     * @var string
+     */
     public $index_name;
 
+    /**
+     * Plugin Client instance passed to class
+     *
+     * @var object
+     */
     public $algolia_client;
 
+    /**
+     * Index custom post type
+     *
+     * @var string
+     */
     public $post_type;
 
+    /**
+     * Log instance
+     *
+     * @var object
+     */
     private $log;
 
+    /**
+     * Constructor
+     *
+     * @param string $index_name
+     * @param object $algolia_client
+     * @param array $index_settings
+     */
     public function __construct($index_name, $algolia_client, $index_settings = array('config' => array()))
     {
         $this->index_name = $index_name;
@@ -40,17 +75,26 @@ class AlgoliaIndex
         $this->log = new Logger($index_name);
         $this->log->pushHandler(new StreamHandler(__DIR__."/debug-index-{$index_name}.log", Logger::DEBUG));
 
-        // try to retrieve cached index first
-        $this->init_index();
-
         // add_action('wp_algolia_update_record', array($this, 'update_record_action'), 10, 2);
+        $this->run();
     }
 
-    public function clear()
-    {
-        $this->index->clearObjects()->wait();
+    /**
+     * Main run command
+     *
+     * @return void
+     */
+    public function run() {
+        $this->init_index();
     }
 
+    /**
+     * Save or update post object to Algolia
+     *
+     * @param int $postID
+     * @param object $post
+     * @return void
+     */
     public function save($postID, $post)
     {
         $data = array(
@@ -74,18 +118,28 @@ class AlgoliaIndex
 
         $this->log->info('Saving object : '.$this->index_objectID($postID));
 
-        // TODO : create transient
-
         // save object
         $this->index->saveObject($data);
     }
 
+    /**
+     * Delete object in Alglia index, clear cache object
+     *
+     * @param [type] $postID
+     * @return void
+     */
     public function delete($postID)
     {
         $this->index->deleteObject($this->index_objectID($postID));
         $this->delete_cached_object($postID);
     }
 
+    /**
+     * Check if a record already exists in Algolia index
+     *
+     * @param int $postID
+     * @return void
+     */
     public function record_exist($postID)
     {
         $objectID = $this->index_objectID($postID);
@@ -105,6 +159,11 @@ class AlgoliaIndex
 
     }
 
+    /**
+     * Init Algolia index and set its settings
+     *
+     * @return void
+     */
     private function init_index()
     {
         $cached_index = $this->get_cached_index();
@@ -132,11 +191,23 @@ class AlgoliaIndex
         }
     }
 
+    /**
+     * Create a unique ID string for Algolia objectID field
+     *
+     * @param int $postID
+     * @return string
+     */
     private function index_objectID($postID)
     {
         return implode('_', array($this->index_settings['post_type'], $postID));
     }
 
+    /**
+     * Strig tags from raw field
+     *
+     * @param string $content
+     * @return string
+     */
     private function prepareTextContent($content)
     {
         $content = strip_tags($content);
@@ -144,6 +215,7 @@ class AlgoliaIndex
 
         return $content;
     }
+
 
     public function cache_index() {
         set_transient($this->cache_key_index(), $this->index, 3600);
