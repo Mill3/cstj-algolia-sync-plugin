@@ -3,7 +3,7 @@
 /**
  * Plugin Name: CSTJ - Algolia Sync
  * Description: Sync data from Wordpress to Algolia
- * Version: 0.0.1
+ * Version: 0.0.2
  * Author Name: Mill3 Studio (Antoine Girard)
  *
  * @package CSTJ_Algolia_Sync

@@ -3,8 +3,8 @@
 /**
  * This file is part of WpAlgolia plugin.
  * (c) Antoine Girard for Mill3 Studio <antoine@mill3.studio>
- * @version 0.0.1
- * @since 0.0.1
+ * @version 0.0.2
+ * @since 0.0.2
  */
 
 namespace WpAlgolia;
@@ -51,12 +51,11 @@ abstract class RegisterAbstract
         add_filter("handle_bulk_actions-edit-{$this->post_type}", array($this, 'handle_bulk_update'), 10, 3);
 
         // add extra column in admin
-        add_filter( "manage_{$this->post_type}_posts_columns", array($this, 'manage_admin_columns'), 10, 3 );
-        add_filter( "manage_{$this->post_type}_posts_custom_column", array($this, 'manage_admin_column'), 10, 3 );
+        add_filter("manage_{$this->post_type}_posts_columns", array($this, 'manage_admin_columns'), 10, 3);
+        add_filter("manage_{$this->post_type}_posts_custom_column", array($this, 'manage_admin_column'), 10, 3);
 
         // Taxonomies action
         foreach ($this->index_settings['taxonomies'] as $key => $taxonomy) {
-            // TODO: implement taxonomy update too
             add_action("edited_{$taxonomy}", array($this, 'update_posts'), 10, 2);
             add_action("delete_{$taxonomy}", array($this, 'update_posts'), 10, 2);
         }
@@ -125,15 +124,16 @@ abstract class RegisterAbstract
         return $redirect_to;
     }
 
-    public function manage_admin_columns($columns) {
-        $columns['in_index'] = __( 'Algolia Index', 'wp_algolia' );
+    public function manage_admin_columns($columns)
+    {
+        $columns['in_index'] = __('Algolia Index', 'wp_algolia');
 
         return $columns;
     }
 
-    public function manage_admin_column($column, $post_id) {
-        // $columns['in_index'] = __( 'Index status', 'wp_algolia' );
-        if ($column === 'in_index') {
+    public function manage_admin_column($column, $post_id)
+    {
+        if ('in_index' === $column) {
             $in_index = $this->algolia_index->record_exist($post_id);
             echo $in_index ? '<span class="dashicons dashicons-yes-alt" style="color: #5468ff;"></span>' : '';
         }
