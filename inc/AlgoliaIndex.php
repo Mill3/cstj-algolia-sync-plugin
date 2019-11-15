@@ -4,7 +4,6 @@
  * This file is part of WpAlgolia plugin.
  * (c) Antoine Girard for Mill3 Studio <antoine@mill3.studio>
  * @version 0.0.2
- * @since 0.0.2
  */
 
 namespace WpAlgolia;
@@ -14,55 +13,54 @@ use Monolog\Logger;
 
 class AlgoliaIndex
 {
-
     /**
-     * Algolia Index settings
+     * Algolia Index settings.
      *
      * @var array
      */
     public $index_settings;
 
     /**
-     * Algolia index instance
+     * Algolia index instance.
      *
      * @var object
      */
     public $index = null;
 
     /**
-     * The index indice name in Algolia
+     * The index indice name in Algolia.
      *
      * @var string
      */
     public $index_name;
 
     /**
-     * Plugin Client instance passed to class
+     * Plugin Client instance passed to class.
      *
      * @var object
      */
     public $algolia_client;
 
     /**
-     * Index custom post type
+     * Index custom post type.
      *
      * @var string
      */
     public $post_type;
 
     /**
-     * Log instance
+     * Log instance.
      *
      * @var object
      */
     private $log;
 
     /**
-     * Constructor
+     * Constructor.
      *
      * @param string $index_name
      * @param object $algolia_client
-     * @param array $index_settings
+     * @param array  $index_settings
      */
     public function __construct($index_name, $algolia_client, $index_settings = array('config' => array()))
     {
@@ -80,20 +78,18 @@ class AlgoliaIndex
     }
 
     /**
-     * Main run command
-     *
-     * @return void
+     * Main run command.
      */
-    public function run() {
+    public function run()
+    {
         $this->init_index();
     }
 
     /**
-     * Save or update post object to Algolia
+     * Save or update post object to Algolia.
      *
-     * @param int $postID
+     * @param int    $postID
      * @param object $post
-     * @return void
      */
     public function save($postID, $post)
     {
@@ -113,7 +109,15 @@ class AlgoliaIndex
 
         // append extra taxonomies
         foreach ($this->index_settings['taxonomies'] as $key => $taxonomy) {
-            $data[$taxonomy] = wp_get_post_terms($post->ID, $taxonomy, array('fields' => 'names'));
+            $terms = wp_get_post_terms($post->ID, $taxonomy, array('fields' => 'names'));
+            $data[$taxonomy] = $terms;
+
+            // if term was found, try to get extra custom fields values
+            // TODO: move this in a class instance settings with $this->index_settings
+            if (isset($terms[0])) {
+                $term = $terms[0];
+                $data["{$taxonomy}_color"] = get_field('color', get_term_by('name', $term, $taxonomy));
+            }
         }
 
         $this->log->info('Saving object : '.$this->index_objectID($postID));
@@ -123,10 +127,9 @@ class AlgoliaIndex
     }
 
     /**
-     * Delete object in Alglia index, clear cache object
+     * Delete object in Alglia index, clear cache object.
      *
      * @param [type] $postID
-     * @return void
      */
     public function delete($postID)
     {
@@ -135,20 +138,20 @@ class AlgoliaIndex
     }
 
     /**
-     * Check if a record already exists in Algolia index
+     * Check if a record already exists in Algolia index.
      *
      * @param int $postID
-     * @return void
      */
     public function record_exist($postID)
     {
         $objectID = $this->index_objectID($postID);
         $cached_object = $this->get_cached_object($postID);
 
-        if ( !$cached_object ) {
+        if (!$cached_object) {
             try {
                 $object = $this->index->getObject($objectID, array('attributesToRetrieve' => 'objectID'));
                 $this->cache_object($postID);
+
                 return true;
             } catch (\Throwable $th) {
                 return false;
@@ -156,45 +159,80 @@ class AlgoliaIndex
         } else {
             return $cached_object;
         }
-
     }
 
     /**
-     * Init Algolia index and set its settings
-     *
-     * @return void
+     * Cache an Algolia index.
+     */
+    public function cache_index()
+    {
+        set_transient($this->cache_key_index(), $this->index, 3600);
+    }
+
+    public function get_cached_index()
+    {
+        return get_transient($this->cache_key_index());
+    }
+
+    public function cache_object($postID)
+    {
+        set_transient($this->cache_key_object($postID), true, 3600);
+    }
+
+    public function get_cached_object($postID)
+    {
+        return get_transient($this->cache_key_object($postID));
+    }
+
+    public function delete_cached_object($postID)
+    {
+        return delete_transient($this->cache_key_object($postID));
+    }
+
+    public function cache_key_index()
+    {
+        return "wp-algolia-index-initialized-{$this->index_name}";
+    }
+
+    public function cache_key_object($postID)
+    {
+        return "wp-algolia-index-object-{$this->post_type}-{$postID}";
+    }
+
+    /**
+     * Init Algolia index and set its settings.
      */
     private function init_index()
     {
         $cached_index = $this->get_cached_index();
 
         // cache found, set stored value to class
-        if ( $cached_index ) {
+        if ($cached_index) {
             $this->log->info('Use cached index');
 
             $this->index = $cached_index;
+
             return;
 
-        // no cache is set, create index with settings
-        } else {
-            $this->log->info('Create index');
-
-            // init index in Algolia
-            $this->index = $this->algolia_client->initIndex($this->index_name);
-
-            // set settings
-            $this->index->setSettings($this->index_settings['config']);
-
-
-            // trigger cache storage
-            $this->cache_index();
+            // no cache is set, create index with settings
         }
+        $this->log->info('Create index');
+
+        // init index in Algolia
+        $this->index = $this->algolia_client->initIndex($this->index_name);
+
+        // set settings
+        $this->index->setSettings($this->index_settings['config']);
+
+        // trigger cache storage
+        $this->cache_index();
     }
 
     /**
-     * Create a unique ID string for Algolia objectID field
+     * Create a unique ID string for Algolia objectID field.
      *
      * @param int $postID
+     *
      * @return string
      */
     private function index_objectID($postID)
@@ -203,46 +241,21 @@ class AlgoliaIndex
     }
 
     /**
-     * Strig tags from raw field
+     * Strig tags from raw field.
      *
      * @param string $content
+     *
      * @return string
      */
     private function prepareTextContent($content)
     {
+        if(gettype($content) != 'string') {
+            return $content;
+        }
+
         $content = strip_tags($content);
         $content = preg_replace('#[\n\r]+#s', ' ', $content);
 
         return $content;
     }
-
-
-    public function cache_index() {
-        set_transient($this->cache_key_index(), $this->index, 3600);
-    }
-
-    public function get_cached_index() {
-        return get_transient($this->cache_key_index());
-    }
-
-    public function cache_object($postID) {
-        set_transient($this->cache_key_object($postID), true, 3600);
-    }
-
-    public function get_cached_object($postID) {
-        return get_transient($this->cache_key_object($postID));
-    }
-
-    public function delete_cached_object($postID) {
-        return delete_transient($this->cache_key_object($postID));
-    }
-
-    public function cache_key_index() {
-        return "wp-algolia-index-initialized-{$this->index_name}";
-    }
-
-    public function cache_key_object($postID) {
-        return "wp-algolia-index-object-{$this->post_type}-{$postID}";
-    }
-
 }

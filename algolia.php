@@ -19,6 +19,9 @@ class Main {
 
     public function __construct($algolia_client) {
         $this->algolia_client = $algolia_client;
+    }
+
+    public function run() {
         $this->register();
         $this->cli();
     }
@@ -64,6 +67,9 @@ add_action(
 
         // instance with supported post types
         $instance = new \WpAlgolia\Main($algoliaClient);
+
+        // run
+        $instance->run();
 
         // // WP CLI commands.
         // if (defined('WP_CLI') && WP_CLI) {
