@@ -2,7 +2,7 @@
 $header = <<<'EOF'
 This file is part of WpAlgolia plugin.
 (c) Antoine Girard for Mill3 Studio <antoine@mill3.studio>
-@version 0.0.2
+@version 0.0.5
 EOF;
 return PhpCsFixer\Config::create()
     ->setRiskyAllowed(true)
