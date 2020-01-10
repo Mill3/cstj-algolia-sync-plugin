@@ -12,6 +12,7 @@ namespace WpAlgolia;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 
+
 abstract class RegisterAbstract
 {
     public $post_type;

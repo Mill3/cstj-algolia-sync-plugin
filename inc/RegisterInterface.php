@@ -7,6 +7,7 @@
  * @since 0.0.2
  */
 
+
 namespace WpAlgolia;
 
 interface RegisterInterface
