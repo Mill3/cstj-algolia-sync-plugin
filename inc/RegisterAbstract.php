@@ -158,8 +158,8 @@ abstract class RegisterAbstract
             'meta_query' => array(
                 array(
                     'key'     => $this->index_settings['hidden_flag_field'],
-                    'compare' => '===',
-                    'value'   => true,
+                    'compare' => '=',
+                    'value'   => 1,
                 )
             ),
         ));
