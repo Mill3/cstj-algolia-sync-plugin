@@ -3,15 +3,13 @@
 /**
  * This file is part of WpAlgolia plugin.
  * (c) Antoine Girard for Mill3 Studio <antoine@mill3.studio>
- * @version 0.0.2
- * @since 0.0.2
+ * @version 0.0.6
  */
 
 namespace WpAlgolia;
 
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
-
 
 abstract class RegisterAbstract
 {
@@ -87,8 +85,17 @@ abstract class RegisterAbstract
             return;
         }
 
+        // should push to index ?
+        if (false === $this->show_in_index($post_ID)) {
+            $this->log->info('Removing record : '.$post_ID);
+            $this->algolia_index->delete($post_ID, $post);
+
+            return;
+        }
+
         // pass all conditions, then save
         $this->log->info('Saving record : '.$post_ID);
+
         $this->algolia_index->save($post_ID, $post);
     }
 
@@ -107,16 +114,19 @@ abstract class RegisterAbstract
 
     public function handle_bulk_update($redirect_to, $doaction, $post_ids)
     {
-        foreach ($post_ids as $postID) {
-            $post = get_post($postID);
+        foreach ($post_ids as $post_ID) {
+            $post = get_post($post_ID);
             if ($post) {
                 switch ($doaction) {
                     case 'wpalgolia_index_update':
-                        $this->algolia_index->save($postID, $post);
+                        // should push to index ?
+                        if (true === $this->show_in_index($post_ID)) {
+                            $this->algolia_index->save($post_ID, $post);
+                        }
                         break;
 
                     case 'wpalgolia_index_delete':
-                        $this->algolia_index->delete($postID);
+                        $this->algolia_index->delete($post_ID);
                         break;
                 }
             }
@@ -145,6 +155,13 @@ abstract class RegisterAbstract
         $posts = get_posts(array(
             'post_type'   => $this->get_post_type(),
             'numberposts' => -1,
+            'meta_query' => array(
+                array(
+                    'key'     => $this->index_settings['hidden_flag_field'],
+                    'compare' => '===',
+                    'value'   => true,
+                )
+            ),
         ));
 
         // update each posts from current post type
@@ -156,5 +173,19 @@ abstract class RegisterAbstract
     public function save_all()
     {
         // TODO: implement for cli
+    }
+
+    /**
+     * Check if post has a bool 'hidden_flag_field' returning true
+     * Any other value should prevent from sending object to Algolia.
+     *
+     * @param [type] $post_ID
+     *
+     * @return bool
+     */
+    public function show_in_index($post_ID)
+    {
+        // return ACF field value
+        return get_field($this->index_settings['hidden_flag_field'], $post_ID);
     }
 }

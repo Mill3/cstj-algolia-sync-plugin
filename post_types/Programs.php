@@ -3,8 +3,7 @@
 /**
  * This file is part of WpAlgolia plugin.
  * (c) Antoine Girard for Mill3 Studio <antoine@mill3.studio>
- * @version 0.0.2
- * @since 0.0.2
+ * @version 0.0.6
  */
 
 namespace WpAlgolia\Register;
@@ -23,10 +22,11 @@ class Programs extends WpAlgoliaRegisterAbstract implements WpAlgoliaRegisterInt
     public function __construct($post_type, $index_name, $algolia_client)
     {
         $index_config = array(
-            'acf_fields' => $this->acf_fields,
-            'taxonomies' => $this->taxonomies,
-            'post_type'  => $post_type,
-            'config'     => array(
+            'acf_fields'        => $this->acf_fields,
+            'taxonomies'        => $this->taxonomies,
+            'post_type'         => $post_type,
+            'hidden_flag_field' => 'search_hidden',
+            'config'            => array(
                 'searchableAttributes'  => $this->searchableAttributes(),
                 'customRanking'         => array('asc(code)'),
                 'attributesForFaceting' => array('searchable(programs_type)', 'searchable(profile)', 'searchable(condition)', 'searchable(duration)'),
