@@ -3,7 +3,7 @@
 /**
  * This file is part of WpAlgolia plugin.
  * (c) Antoine Girard for Mill3 Studio <antoine@mill3.studio>
- * @version 0.0.6
+ * @version 0.0.7
  */
 
 namespace WpAlgolia;
