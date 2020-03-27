@@ -56,6 +56,13 @@ class AlgoliaIndex
     private $log;
 
     /**
+     * Content light limit.
+     *
+     * @var integer
+     */
+    protected $contentLimit = 1000;
+
+    /**
      * Constructor.
      *
      * @param string $index_name
@@ -256,6 +263,14 @@ class AlgoliaIndex
         $content = strip_tags($content);
         $content = preg_replace('#[\n\r]+#s', ' ', $content);
 
+        if ($this->isContentLargeEnough($content)) {
+            $content = substr($content, 0, $this->contentLimit);
+        }
+
         return $content;
+    }
+
+    private function isContentLargeEnough($content) {
+        return mb_strlen($content, 'UTF-8') > $this->contentLimit;
     }
 }
