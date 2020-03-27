@@ -22,6 +22,10 @@ class ComposerStaticInit30145bc9408c5219f52e020f1c1b494a
         array (
             'Monolog\\' => 8,
         ),
+        'C' => 
+        array (
+            'Cocur\\Slugify\\' => 14,
+        ),
         'A' => 
         array (
             'Algolia\\AlgoliaSearch\\' => 22,
@@ -44,6 +48,10 @@ class ComposerStaticInit30145bc9408c5219f52e020f1c1b494a
         'Monolog\\' => 
         array (
             0 => __DIR__ . '/..' . '/monolog/monolog/src/Monolog',
+        ),
+        'Cocur\\Slugify\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/cocur/slugify/src',
         ),
         'Algolia\\AlgoliaSearch\\' => 
         array (

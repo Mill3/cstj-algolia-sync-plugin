@@ -1,6 +1,7 @@
 {
     "require": {
         "algolia/algoliasearch-client-php": "^2.4",
-        "monolog/monolog": "^2.0"
+        "monolog/monolog": "^2.0",
+        "cocur/slugify": "^4.0"
     }
 }

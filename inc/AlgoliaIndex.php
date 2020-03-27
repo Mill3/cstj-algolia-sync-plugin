@@ -8,6 +8,7 @@
 
 namespace WpAlgolia;
 
+use Cocur\Slugify\Slugify;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 
@@ -130,7 +131,11 @@ class AlgoliaIndex
         $this->log->info('Saving object : '.$this->index_objectID($postID));
 
         // save object
-        $this->index->saveObject($data);
+        try {
+            $saved = $this->index->saveObject($data);
+        } catch (Exception $e) {
+            $this->log->error('Could not insert record in index');
+        }
     }
 
     /**
@@ -263,14 +268,16 @@ class AlgoliaIndex
         $content = strip_tags($content);
         $content = preg_replace('#[\n\r]+#s', ' ', $content);
 
-        if ($this->isContentLargeEnough($content)) {
+        // remove all accents from content
+        $slugify = new Slugify();
+        $content = $slugify->slugify($content, " ");
+
+        // prevent content max-length
+        if (mb_strlen($content, 'UTF-8') > $this->contentLimit) {
             $content = substr($content, 0, $this->contentLimit);
         }
 
         return $content;
     }
 
-    private function isContentLargeEnough($content) {
-        return mb_strlen($content, 'UTF-8') > $this->contentLimit;
-    }
 }
