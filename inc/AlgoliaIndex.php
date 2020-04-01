@@ -8,6 +8,7 @@
 
 namespace WpAlgolia;
 
+use Carbon\Carbon;
 use Cocur\Slugify\Slugify;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
@@ -107,8 +108,14 @@ class AlgoliaIndex
             'post_thumbnail'    => get_the_post_thumbnail_url($post, 'large'),
             'excerpt'           => $this->prepareTextContent($post->post_excerpt),
             'content'           => $this->prepareTextContent($post->post_content),
+            // 'date'              => $post->,
             'url'               => get_post_permalink($post->ID),
         );
+
+        // append date formatted in FR locale
+        $date = $post->post_date;
+        $parsed_date = Carbon::parse($date);
+        $data['post_date'] = $parsed_date->locale('fr')->isoFormat('Do MMMM YYYY, h:mm:ss a');
 
         // append each custom field values
         foreach ($this->index_settings['acf_fields'] as $key => $field) {
