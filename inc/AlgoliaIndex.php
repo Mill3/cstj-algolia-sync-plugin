@@ -109,7 +109,7 @@ class AlgoliaIndex
             'excerpt'           => $this->prepareTextContent($post->post_excerpt),
             'content'           => $this->prepareTextContent($post->post_content),
             // 'date'              => $post->,
-            'url'               => get_post_permalink($post->ID),
+            'url'               => get_permalink($post->ID),
         );
 
         // append date formatted in FR locale
