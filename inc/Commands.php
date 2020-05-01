@@ -81,8 +81,12 @@ class Commands extends WP_CLI_Command
     {
         list($indexName) = $args;
 
+        echo $indexName;
+
         // get registered post type
         $indexInstance = $this->get_registered_post_type($indexName);
+
+        // echo $indexInstance;
 
         if( !$indexInstance ) {
             WP_CLI::error(sprintf("Index for post type '%s' is not a registered index.", $indexName));

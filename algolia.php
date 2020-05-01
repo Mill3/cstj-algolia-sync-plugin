@@ -32,9 +32,9 @@ class Main {
     }
 
     private function register() {
-        $this->registered_post_types['programs'] = new \WpAlgolia\Register\Posts('post', ALGOLIA_PREFIX . 'post', $this->algolia_client);
+        $this->registered_post_types['post'] = new \WpAlgolia\Register\Posts('post', ALGOLIA_PREFIX . 'post', $this->algolia_client);
         $this->registered_post_types['page'] = new \WpAlgolia\Register\Pages('page', ALGOLIA_PREFIX . 'page', $this->algolia_client);
-        $this->registered_post_types['post'] = new \WpAlgolia\Register\Programs('programs', ALGOLIA_PREFIX . 'programs', $this->algolia_client);
+        $this->registered_post_types['programs'] = new \WpAlgolia\Register\Programs('programs', ALGOLIA_PREFIX . 'programs', $this->algolia_client);
     }
 
 }
