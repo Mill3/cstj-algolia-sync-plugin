@@ -5,7 +5,7 @@
  * GitHub Plugin URI:  https://github.com/Mill3/cstj-algolia-sync-plugin
  * Plugin Name: CSTJ - Algolia Sync
  * Description: Sync data from Wordpress to Algolia
- * Version: 0.1.00
+ * Version: 0.1.1
  * Author Name: Mill3 Studio (Antoine Girard)
  *
  * @package CSTJ_Algolia_Sync
@@ -15,9 +15,9 @@ namespace WpAlgolia;
 
 class Main {
 
-    private $algolia_client;
+    public $algolia_client;
 
-    private $registered_post_types = array();
+    public $registered_post_types = array();
 
     public function __construct($algolia_client) {
         $this->algolia_client = $algolia_client;
