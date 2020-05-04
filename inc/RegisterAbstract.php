@@ -159,7 +159,7 @@ abstract class RegisterAbstract
     public function manage_admin_column($column, $post_ID)
     {
         if ('in_index' === $column) {
-            echo '<span data-check-algolia-status data-post-id="' . $post_ID , '" class="dashicons loading"></span>';
+            echo '<span data-check-algolia-status data-post-id="' . $post_ID , '" class="loading"></span>';
         }
     }
 
@@ -183,19 +183,15 @@ abstract class RegisterAbstract
     public function manage_admin_footer() {
     ?>
         <style>
-            @keyframes rotate {
-                to {
-                    transform: rotate(360deg);
-                }
-            }
 
             [data-check-algolia-status] {
-                display: inline-block;
+                /* display: inline-block; */
                 vertical-align: top;
                 width: 12px !important;
                 height: 12px !important;
                 border-radius: 50%!important;
                 margin: 3px 10px 0 3px;
+                display: block;
             }
 
             [data-check-algolia-status].loading {
@@ -212,41 +208,47 @@ abstract class RegisterAbstract
         </style>
         <script type="text/javascript">
         jQuery(document).ready(function($) {
-            var items = $("[data-check-algolia-status]");
-            var data = {
-                'action': 'check_algolia_status_<?php echo $this->post_type ?>',
-                'post_type': '<?php echo $this->post_type ?>',
-                ids: []
-            };
 
-            // get all post IDs and push to data object
-            $.each(items, function(i, item) {
-                data.ids.push($(item).data('post-id'))
-            });
+            setTimeout(function() {
 
-            jQuery.ajax({
-                url : window.ajaxurl,
-                type : 'POST',
-                dataType: "json",
-                async: false,
-                data : data,
-                success: function(response) {
-                    jQuery.each(response.data.items, function(i, item) {
-                        // get element using loop's current index
-                        var el = $(items[i]);
+                var items = $("[data-check-algolia-status]");
+                var data = {
+                    'action': 'check_algolia_status_<?php echo $this->post_type ?>',
+                    'post_type': '<?php echo $this->post_type ?>',
+                    ids: []
+                };
 
-                        // set el as loaded
-                        el.addClass('loaded').removeClass('dashicons dashicons-update-alt loading');
 
-                        // handle style with classname for record status
-                        if (item.record_exist) {
-                            el.addClass('yes');
-                        } else {
-                            el.addClass('no');
-                        }
-                    })
-                }
-            });
+                // get all post IDs and push to data object
+                $.each(items, function(i, item) {
+                    data.ids.push($(item).data('post-id'))
+                });
+
+                jQuery.ajax({
+                    url : window.ajaxurl,
+                    type : 'POST',
+                    dataType: "json",
+                    async: false,
+                    data : data,
+                    success: function(response) {
+                        jQuery.each(response.data.items, function(i, item) {
+                            // get element using loop's current index
+                            var el = $(items[i]);
+
+                            // set el as loaded
+                            // el.addClass('loaded').removeClass('dashicons dashicons-update-alt loading');
+
+                            // handle style with classname for record status
+                            if (item.record_exist) {
+                                el.addClass('yes');
+                            } else {
+                                el.addClass('no');
+                            }
+                        })
+                    }
+                });
+
+            }, 1000);
         });
         </script>
     <?php
