@@ -225,20 +225,23 @@ abstract class RegisterAbstract
                 url : window.ajaxurl,
                 type : 'POST',
                 dataType: "json",
-                async: false,
+                async: true,
                 data : data,
                 success: function(response) {
                     response.data.items.forEach((item, index) => {
-                        const el = elements[index];
-                        el.classList.remove('loading');
                         if (item.record_exist) {
-                            el.classList.add('yes');
+                            elements[index].classList.remove('loading');
+                            elements[index].classList.add('yes');
                         } else {
-                            el.classList.add('no');
+                            elements[index].classList.remove('loading');
+                            elements[index].classList.add('no');
                         }
                     })
                 }
             });
+            // setTimeout( () => {
+            // }, 1000);
+
 
         });
         </script>
