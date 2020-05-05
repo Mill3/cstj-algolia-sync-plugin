@@ -61,6 +61,14 @@ class Pages extends WpAlgoliaRegisterAbstract implements WpAlgoliaRegisterInterf
                 array_push($data['content_rows'], $instance->cleanText($row_data['text']));
             }
 
+            if (isset($row_data['title'])) {
+                array_push($data['content_rows'], $instance->cleanText($row_data['title']));
+            }
+
+            if (isset($row_data['subtitle'])) {
+                array_push($data['content_rows'], $instance->cleanText($row_data['subtitle']));
+            }
+
             if (isset($row_data['texte'])) {
                 array_push($data['content_rows'], $instance->cleanText($row_data['texte']));
             }
@@ -69,6 +77,13 @@ class Pages extends WpAlgoliaRegisterAbstract implements WpAlgoliaRegisterInterf
                 foreach ($row_data['faqs'] as $faq) {
                     array_push($data['content_rows'], $instance->cleanText($faq->post_title));
                     array_push($data['content_rows'], $instance->cleanText($faq->post_content));
+                }
+            }
+
+            if ( isset($row_data['staff']) && \is_array($row_data['staff']) ) {
+                foreach ($row_data['staff'] as $staff) {
+                    array_push($data['content_rows'], $instance->cleanText($staff->post_title));
+                    array_push($data['content_rows'], $instance->cleanText($staff->post_content));
                 }
             }
 
