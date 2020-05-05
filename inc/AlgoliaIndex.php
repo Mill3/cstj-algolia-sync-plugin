@@ -65,11 +65,11 @@ class AlgoliaIndex
     public $instance;
 
     /**
-     * Content lenght limit
+     * Content bytes limit
      *
      * @var integer
      */
-    protected $contentLimit = 1000;
+    protected $contentLimit = 8000;
 
     /**
      * Constructor.
@@ -281,7 +281,26 @@ class AlgoliaIndex
     }
 
     /**
-     * Strig tags from raw field.
+     * Strig all html tags and accent from string
+     *
+     * @param string $content
+     *
+     * @return string
+     */
+    public function cleanText($content) {
+        $content = strip_tags($content);
+        $content = preg_replace('#[\n\r]+#s', ' ', $content);
+
+        // remove all accents from content
+        $slugify = new Slugify();
+        $content = $slugify->slugify($content, " ");
+
+        return $content;
+    }
+
+
+    /**
+     * Strip and reduce content lenght when needed
      *
      * @param string $content
      *
@@ -293,12 +312,7 @@ class AlgoliaIndex
             return $content;
         }
 
-        $content = strip_tags($content);
-        $content = preg_replace('#[\n\r]+#s', ' ', $content);
-
-        // remove all accents from content
-        $slugify = new Slugify();
-        $content = $slugify->slugify($content, " ");
+        $content = $this->cleanText($content);
 
         // prevent content max-length
         if (mb_strlen($content, 'UTF-8') > $this->contentLimit) {

@@ -52,30 +52,35 @@ class Pages extends WpAlgoliaRegisterAbstract implements WpAlgoliaRegisterInterf
         // array holder for each content rows
         $data['content_rows'] = [];
 
+        // index a bunch of content-rows
         foreach ($content_rows as $key => $row) {
             $layout = $row['acf_fc_layout'];
             $row_data = isset($row[$layout]) ? $row[$layout] : null;
 
             if (isset($row_data['text'])) {
-                array_push($data['content_rows'], $instance->prepareTextContent($row_data['text']));
+                array_push($data['content_rows'], $instance->cleanText($row_data['text']));
             }
 
             if (isset($row_data['texte'])) {
-                array_push($data['content_rows'], $instance->prepareTextContent($row_data['texte']));
+                array_push($data['content_rows'], $instance->cleanText($row_data['texte']));
             }
 
             if ( isset($row_data['faqs']) && \is_array($row_data['faqs']) ) {
                 foreach ($row_data['faqs'] as $faq) {
-                    array_push($data['content_rows'], $instance->prepareTextContent($faq->post_title));
+                    array_push($data['content_rows'], $instance->cleanText($faq->post_title));
+                    array_push($data['content_rows'], $instance->cleanText($faq->post_content));
                 }
             }
 
             if (isset($row_data['text_columns']) && \is_array($row_data['text_columns'])) {
                 foreach ($row_data['text_columns'] as $text_column) {
-                    array_push($data['content_rows'], $instance->prepareTextContent($text_column['content']));
+                    array_push($data['content_rows'], $instance->cleanText($text_column['content']));
                 }
             }
         }
+
+        // merge all text in a single long string
+        $data['content_rows'] = $instance->prepareTextContent( implode( $data['content_rows'], ', ') );
 
         return $data;
     }
