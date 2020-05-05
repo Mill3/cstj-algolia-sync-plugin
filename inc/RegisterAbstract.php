@@ -239,10 +239,6 @@ abstract class RegisterAbstract
                     })
                 }
             });
-            // setTimeout( () => {
-            // }, 1000);
-
-
         });
         </script>
     <?php

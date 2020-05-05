@@ -8,10 +8,10 @@
 
 namespace WpAlgolia;
 
-use Carbon\Carbon;
-use Cocur\Slugify\Slugify;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
+use Carbon\Carbon;
+use Cocur\Slugify\Slugify;
 
 class AlgoliaIndex
 {
@@ -55,10 +55,17 @@ class AlgoliaIndex
      *
      * @var object
      */
-    private $log;
+    public $log;
 
     /**
-     * Content light limit.
+     * parent class instance reference.
+     *
+     * @var object
+     */
+    public $instance;
+
+    /**
+     * Content lenght limit
      *
      * @var integer
      */
@@ -71,17 +78,14 @@ class AlgoliaIndex
      * @param object $algolia_client
      * @param array  $index_settings
      */
-    public function __construct($index_name, $algolia_client, $index_settings = array('config' => array()))
+    public function __construct($index_name, $algolia_client, $index_settings = array('config' => array()), $log, $instance)
     {
         $this->index_name = $index_name;
         $this->algolia_client = $algolia_client;
         $this->index_settings = $index_settings;
         $this->post_type = $index_settings['post_type'];
-
-        // create logging
-        $this->log = new Logger($index_name);
-        $this->log->pushHandler(new StreamHandler(__DIR__."/logs/debug.{$index_name}.log", Logger::DEBUG));
-
+        $this->log = $log;
+        $this->instance = $instance;
         $this->run();
     }
 
@@ -102,23 +106,43 @@ class AlgoliaIndex
     public function save($postID, $post)
     {
         $data = array(
-            'objectID'          => $this->index_objectID($postID),
+            'objectID'          => $this->index_objectID($post->ID),
             'post_title'        => $post->post_title,
-            'post_thumbnail'    => get_the_post_thumbnail_url($post, 'large'),
-            'excerpt'           => $this->prepareTextContent($post->post_excerpt),
+            'post_thumbnail'    => get_the_post_thumbnail_url($post, 'post-thumbnail'),
+            'excerpt'           => $post->post_excerpt ? $this->prepareTextContent($post->post_excerpt) : $this->prepareTextContent($post->post_content, 125),
             'content'           => $this->prepareTextContent($post->post_content),
-            // 'date'              => $post->,
             'url'               => get_permalink($post->ID),
+            'post_type'         => get_post_type($post->ID)
         );
 
-        // append date formatted in FR locale
-        $date = $post->post_date;
-        $parsed_date = Carbon::parse($date);
-        $data['post_date'] = $parsed_date->locale('fr')->isoFormat('Do MMMM YYYY, h:mm:ss a');
+        // handle extra fields formating per post-type
+        if(method_exists($this->instance, 'extraFields')) {
+            $data = $this->instance->extraFields($data, $post->ID, $this);
+        }
 
         // append each custom field values
         foreach ($this->index_settings['acf_fields'] as $key => $field) {
-            $data[$field] = $this->prepareTextContent(get_field($field, $postID));
+
+            // get ACF data
+            if (is_array($field)) {
+                $field_data = get_field($key, $postID);
+            } else {
+                $field_data = get_field($field, $postID);
+            }
+
+            if($field_data) {
+                if ( is_array($field) ) {
+                    foreach ($field as $field_label) {
+                        if (count($field) === 1) {
+                            $data[$key] = $this->prepareTextContent($field_data->$field_label);
+                        } else {
+                            $data["{$key}_{$field_label}"] = $this->prepareTextContent($field_data->$field_label);
+                        }
+                    }
+                } else {
+                    $data[$field] = $this->prepareTextContent($field_data);
+                }
+            };
         }
 
         // append extra taxonomies
@@ -126,22 +150,15 @@ class AlgoliaIndex
             $terms = wp_get_post_terms($post->ID, $taxonomy, array('fields' => 'names'));
             $data[$taxonomy] = $terms;
 
-            // if term was found, try to get extra custom fields values
-            // TODO: move this in a class instance settings with $this->index_settings
             if (isset($terms[0])) {
                 $term = $terms[0];
                 $data["{$taxonomy}_color"] = get_field('color', get_term_by('name', $term, $taxonomy));
             }
-        }
 
-        $this->log->info('Saving object : '.$this->index_objectID($postID));
+        }
 
         // save object
-        try {
-            $saved = $this->index->saveObject($data);
-        } catch (Exception $e) {
-            $this->log->error('Could not insert record in index');
-        }
+        $this->index->saveObject($data);
     }
 
     /**
@@ -220,27 +237,32 @@ class AlgoliaIndex
     /**
      * Init Algolia index and set its settings.
      */
-    private function init_index()
+    public function init_index($settings = false)
     {
         $cached_index = $this->get_cached_index();
 
         // cache found, set stored value to class
         if ($cached_index) {
-            $this->log->info('Use cached index');
+            // $this->log->info('Use cached index');
 
             $this->index = $cached_index;
+
+            if($settings) {
+                $this->index->setSettings($this->index_settings['config']);
+            }
 
             return;
 
             // no cache is set, create index with settings
         }
-        $this->log->info('Create index');
 
         // init index in Algolia
         $this->index = $this->algolia_client->initIndex($this->index_name);
 
         // set settings
-        $this->index->setSettings($this->index_settings['config']);
+        if($settings) {
+            $this->index->setSettings($this->index_settings['config']);
+        }
 
         // trigger cache storage
         $this->cache_index();
@@ -265,7 +287,7 @@ class AlgoliaIndex
      *
      * @return string
      */
-    private function prepareTextContent($content)
+    public function prepareTextContent($content, $trimLength = 0)
     {
         if(gettype($content) != 'string') {
             return $content;
@@ -283,7 +305,8 @@ class AlgoliaIndex
             $content = substr($content, 0, $this->contentLimit);
         }
 
+        $content = $trimLength > 0 ? mb_strimwidth($content, 0, $trimLength, '...') : $content;
+
         return $content;
     }
-
 }

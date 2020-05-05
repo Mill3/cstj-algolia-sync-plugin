@@ -13,7 +13,7 @@ use WpAlgolia\RegisterInterface as WpAlgoliaRegisterInterface;
 
 class Pages extends WpAlgoliaRegisterAbstract implements WpAlgoliaRegisterInterface
 {
-    public $searchable_fields = array('post_title', 'content');
+    public $searchable_fields = array('post_title', 'content', 'content_rows');
 
     public $acf_fields = array();
 
@@ -41,5 +41,42 @@ class Pages extends WpAlgoliaRegisterAbstract implements WpAlgoliaRegisterInterf
     public function searchableAttributes()
     {
         return array_merge($this->searchable_fields, $this->acf_fields, $this->taxonomies);
+    }
+
+    // implement any special data handling for post type here
+    public function extraFields($data, $postID, $instance) {
+
+        $content_rows = get_field('content_rows', $postID);
+        if(!\is_array($content_rows)) return $data;
+
+        // array holder for each content rows
+        $data['content_rows'] = [];
+
+        foreach ($content_rows as $key => $row) {
+            $layout = $row['acf_fc_layout'];
+            $row_data = isset($row[$layout]) ? $row[$layout] : null;
+
+            if (isset($row_data['text'])) {
+                array_push($data['content_rows'], $instance->prepareTextContent($row_data['text']));
+            }
+
+            if (isset($row_data['texte'])) {
+                array_push($data['content_rows'], $instance->prepareTextContent($row_data['texte']));
+            }
+
+            if ( isset($row_data['faqs']) && \is_array($row_data['faqs']) ) {
+                foreach ($row_data['faqs'] as $faq) {
+                    array_push($data['content_rows'], $instance->prepareTextContent($faq->post_title));
+                }
+            }
+
+            if (isset($row_data['text_columns']) && \is_array($row_data['text_columns'])) {
+                foreach ($row_data['text_columns'] as $text_column) {
+                    array_push($data['content_rows'], $instance->prepareTextContent($text_column['content']));
+                }
+            }
+        }
+
+        return $data;
     }
 }
