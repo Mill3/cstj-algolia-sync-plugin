@@ -136,6 +136,8 @@ abstract class RegisterAbstract
                     case 'wpalgolia_index_update':
                         if (true === $this->show_in_index($post_ID)) {
                             $this->algolia_index($post->ID)->save($post->ID, $post);
+                        } else {
+                            $this->algolia_index($post->ID)->delete($post_ID);
                         }
                         break;
 
@@ -289,10 +291,9 @@ abstract class RegisterAbstract
      */
     public function show_in_index($post_ID)
     {
-        // return ACF field value, defaults to true
+        // return ACF field value checking if should hide/remove index, defaults to true
         if (\function_exists('get_field')) {
-            $value = get_field($this->index_settings['hidden_flag_field'], $post_ID);
-            return $value ? $value : true;
+            return get_field($this->index_settings['hidden_flag_field'], $post_ID);
         } else {
             return true;
         }
@@ -346,13 +347,23 @@ abstract class RegisterAbstract
         // update each posts found from current post type
         foreach ($posts as $key => $post) {
              // check if should push to index ?
-            if (false === $this->show_in_index($post->ID)) return;
+            if (false === $this->show_in_index($post->ID)) {
+                $this->algolia_index($post->ID)->delete($post->ID);
 
-            if (defined('WP_CLI') && WP_CLI) {
-                \WP_CLI::line(sprintf(__('Updating index "%s" with PostID %s : %s', 'wp_algolia'), $this->get_post_type(), $post->ID, $post->post_title));
+                if (defined('WP_CLI') && WP_CLI) {
+                    \WP_CLI::warning(sprintf(__('Remove from index "%s" PostID %s : %s', 'wp_algolia'), $this->get_post_type(), $post->ID, $post->post_title));
+                }
+
+                // return;
+            } else {
+
+                if (defined('WP_CLI') && WP_CLI) {
+                    \WP_CLI::success(sprintf(__('Updating index "%s" with PostID %s : %s', 'wp_algolia'), $this->get_post_type(), $post->ID, $post->post_title));
+                }
+
+                $this->algolia_index($post->ID)->save($post->ID, $post);
             }
 
-            $this->algolia_index($post->ID)->save($post->ID, $post);
         }
     }
 
