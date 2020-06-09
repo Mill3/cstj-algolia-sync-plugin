@@ -291,12 +291,9 @@ abstract class RegisterAbstract
      */
     public function show_in_index($post_ID)
     {
-        // return true;
         // return ACF field value checking if should hide/remove index, defaults to true
         if (\function_exists('get_field')) {
-            $value = get_field($this->index_settings['hidden_flag_field'], $post_ID);
-            $show = $value === true || $value === 1;
-            return $show;
+            return get_field($this->index_settings['hidden_flag_field'], $post_ID);
         } else {
             return true;
         }
