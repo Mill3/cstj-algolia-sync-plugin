@@ -57,6 +57,15 @@ class Pages extends WpAlgoliaRegisterAbstract implements WpAlgoliaRegisterInterf
             $layout = $row['acf_fc_layout'];
             $row_data = isset($row[$layout]) ? $row[$layout] : null;
 
+            // xxx : hack for row_accordion
+            if($layout === 'row_accordion') {
+                $row_data = $row['summary_accordion'];
+            }
+
+            if (isset($row_data['intro'])) {
+                array_push($data['content_rows'], $instance->cleanText($row_data['intro']));
+            }
+
             if (isset($row_data['text'])) {
                 array_push($data['content_rows'], $instance->cleanText($row_data['text']));
             }
@@ -77,6 +86,13 @@ class Pages extends WpAlgoliaRegisterAbstract implements WpAlgoliaRegisterInterf
                 foreach ($row_data['faqs'] as $faq) {
                     array_push($data['content_rows'], $instance->cleanText($faq->post_title));
                     array_push($data['content_rows'], $instance->cleanText($faq->post_content));
+                }
+            }
+
+            if ( isset($row_data['summary_accordion_items']) && \is_array($row_data['summary_accordion_items'])  ) {
+                foreach ($row_data['summary_accordion_items'] as $accordion) {
+                    array_push($data['content_rows'], $instance->cleanText($accordion['title']));
+                    array_push($data['content_rows'], $instance->cleanText($accordion['text']));
                 }
             }
 
