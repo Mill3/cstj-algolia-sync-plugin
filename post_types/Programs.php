@@ -17,7 +17,7 @@ class Programs extends WpAlgoliaRegisterAbstract implements WpAlgoliaRegisterInt
 
     public $acf_fields = array('code', 'brochure', 'title', 'subtitle', 'body', 'service_quebec_subvention', 'why_title', 'why_subtitle', 'perspectives_title', 'perspectives_subtitle', 'verify_title');
 
-    public $taxonomies = array('duration', 'programs_type', 'formations_type', 'profile', 'condition', 'period', 'teaching_mode', 'weekday_period', 'frequency');
+    public $taxonomies = array('duration', 'programs_type', 'formations_type', 'profile', 'period', 'teaching_mode', 'weekday_period', 'frequency');
 
     public function __construct($post_type, $index_name, $algolia_client)
     {
