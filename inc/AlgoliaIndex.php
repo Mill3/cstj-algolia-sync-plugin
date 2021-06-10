@@ -312,7 +312,7 @@ class AlgoliaIndex
             return $content;
         }
 
-        $content = $this->cleanText($content);
+        // $content = $this->cleanText($content);
 
         // prevent content max-length
         if (mb_strlen($content, 'UTF-8') > $this->contentLimit) {
