@@ -15,7 +15,17 @@ class Programs extends WpAlgoliaRegisterAbstract implements WpAlgoliaRegisterInt
 {
     public $searchable_fields = array('post_title');
 
-    public $acf_fields = array('code', 'brochure', 'title', 'subtitle', 'body', 'why_title', 'why_subtitle', 'perspectives_title', 'perspectives_subtitle', 'verify_title', 'external_url');
+    public $acf_fields = array(
+        'brochure',
+        'title',
+        'subtitle',
+        'body',
+        'why_title',
+        'why_subtitle',
+        'perspectives_title',
+        'perspectives_subtitle',
+        'verify_title'
+    );
 
     public $taxonomies = array('duration', 'programs_type', 'profile', 'condition', 'period');
 
@@ -44,4 +54,15 @@ class Programs extends WpAlgoliaRegisterAbstract implements WpAlgoliaRegisterInt
     {
         return array_merge($this->searchable_fields, $this->acf_fields, $this->taxonomies);
     }
+
+    // implement any special data handling for post type here
+    public function extraFields($data, $postID, $instance) {
+
+        $code = get_field('code', $postID);
+        $external_url = get_field('external_url', $postID);
+        $data['code'] = $code;
+        $data['external_url'] = $external_url;
+        return $data;
+    }
+
 }

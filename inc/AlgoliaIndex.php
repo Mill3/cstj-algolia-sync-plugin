@@ -308,6 +308,7 @@ class AlgoliaIndex
      */
     public function prepareTextContent($content, $trimLength = 0)
     {
+
         if(gettype($content) != 'string') {
             return $content;
         }
