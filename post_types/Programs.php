@@ -15,7 +15,7 @@ class Programs extends WpAlgoliaRegisterAbstract implements WpAlgoliaRegisterInt
 {
     public $searchable_fields = array('post_title');
 
-    public $acf_fields = array('code', 'brochure', 'title', 'subtitle', 'body', 'why_title', 'why_subtitle', 'perspectives_title', 'perspectives_subtitle', 'verify_title');
+    public $acf_fields = array('code', 'brochure', 'title', 'subtitle', 'body', 'why_title', 'why_subtitle', 'perspectives_title', 'perspectives_subtitle', 'verify_title', 'external_url');
 
     public $taxonomies = array('duration', 'programs_type', 'profile', 'condition', 'period');
 
