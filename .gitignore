@@ -5,3 +5,5 @@ build
 yarn.lock
 composer.lock
 *.log
+*.pid
+.DS_Store

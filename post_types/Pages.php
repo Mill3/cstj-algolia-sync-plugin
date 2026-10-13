@@ -111,7 +111,7 @@ class Pages extends WpAlgoliaRegisterAbstract implements WpAlgoliaRegisterInterf
         }
 
         // merge all text in a single long string
-        $data['content_rows'] = $instance->prepareTextContent( implode( $data['content_rows'], ', ') );
+        $data['content_rows'] = $instance->prepareTextContent( implode(', ', $data['content_rows']) );
 
         return $data;
     }

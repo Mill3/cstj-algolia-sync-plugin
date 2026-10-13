@@ -116,7 +116,7 @@ abstract class RegisterAbstract
 
     public function delete_post($postID, $post)
     {
-        $this->algolia_index($post_ID)->delete($postID, $post);
+        $this->algolia_index($postID)->delete($postID, $post);
     }
 
     public function register_bulk_update($bulk_actions)
@@ -166,7 +166,7 @@ abstract class RegisterAbstract
     }
 
     public function manage_admin_check_algolia_status() {
-        $ids = $_POST['ids'];
+        $ids = $_POST['ids'] ?? [];
         $items = array();
 
         if(empty($ids)) return;

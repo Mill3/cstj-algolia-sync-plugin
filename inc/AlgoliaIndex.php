@@ -78,7 +78,7 @@ class AlgoliaIndex
      * @param object $algolia_client
      * @param array  $index_settings
      */
-    public function __construct($index_name, $algolia_client, $index_settings = array('config' => array()), $log, $instance)
+    public function __construct($index_name, $algolia_client, $index_settings, $log, $instance)
     {
         $this->index_name = $index_name;
         $this->algolia_client = $algolia_client;
@@ -288,7 +288,7 @@ class AlgoliaIndex
      * @return string
      */
     public function cleanText($content) {
-        $content = strip_tags($content);
+        $content = strip_tags((string) $content);
         $content = preg_replace('#[\n\r]+#s', ' ', $content);
 
         // remove all accents from content
